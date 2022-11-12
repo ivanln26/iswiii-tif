@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/go-redis/redis/v9"
 )
 
 type msg struct {
@@ -29,6 +32,19 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	ctx := context.Background()
+
+	r := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+		Password: "",
+		DB: 0,
+	})
+	res, err := r.Ping(ctx).Result()
+	if err != nil {
+		panic("redis not connected")
+	}
+	fmt.Println(res)
+
 	http.HandleFunc("/", Index)
 	http.ListenAndServe(":8000", nil)
 }
