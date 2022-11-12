@@ -44,6 +44,15 @@ func main() {
 		panic("redis not connected")
 	}
 	fmt.Println(res)
+	pubsub := r.Subscribe(ctx, "votes")
+	ch := pubsub.Channel()
+
+	go func() {
+		for msg := range ch {
+			fmt.Println(msg)
+		}
+	}()
+
 
 	http.HandleFunc("/", Index)
 	http.ListenAndServe(":8000", nil)
