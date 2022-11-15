@@ -1,7 +1,7 @@
 import { trpc } from "@/utils/trpc";
 
 export default function Home() {
-  const mutation = trpc.vote.useMutation();
+  const mutation = trpc.voteCreate.useMutation();
 
   return (
     <div>

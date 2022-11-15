@@ -3,12 +3,13 @@ import { z } from "zod";
 import { publicProcedure, router } from "../trpc";
 
 export const appRouter = router({
-  vote: publicProcedure
+  voteCreate: publicProcedure
     .input(z.object({ choice: z.number().int() }))
     .mutation(async ({ input }) => {
-      await redis.publish("votes", `{"vote": ${input.choice}}`);
+      const vote = input;
+      await redis.publish("votes", JSON.stringify(vote));
       return {
-        detail: "voted correctly",
+        vote,
       };
     }),
 });
