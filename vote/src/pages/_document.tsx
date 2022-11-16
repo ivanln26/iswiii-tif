@@ -6,7 +6,7 @@ export default function Document() {
       <Head>
         <title>Voting App</title>
       </Head>
-      <body>
+      <body className="text-white">
         <Main />
         <NextScript />
       </body>
