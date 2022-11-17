@@ -4,10 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-redis/redis/v9"
 )
+
+func GetEnv(key string, def string) string {
+	env, ok := os.LookupEnv(key)
+	if !ok {
+		return def
+	}
+	return env
+}
 
 type Vote struct {
 	Choice int `json:"choice"`
@@ -55,18 +65,23 @@ func ListVotes(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := GetEnv("PORT", "8080")
+	redisHost := GetEnv("REDIS_HOST", "localhost")
+	redisPort := GetEnv("REDIS_PORT", "6379")
+	log.Printf("Redis URI: %s:%s", redisHost, redisPort)
+
 	ctx := context.Background()
 
 	r := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr:     redisHost + ":" + redisPort,
 		Password: "",
-		DB: 0,
+		DB:       0,
 	})
 	res, err := r.Ping(ctx).Result()
 	if err != nil {
 		panic("redis not connected")
 	}
-	fmt.Println(res)
+	log.Println(res)
 	pubsub := r.Subscribe(ctx, "votes")
 	ch := pubsub.Channel()
 
@@ -82,8 +97,8 @@ func main() {
 		}
 	}()
 
-
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/votes", ListVotes)
-	http.ListenAndServe(":8000", nil)
+	log.Printf("Application running on port: %s", port)
+	http.ListenAndServe(":"+port, nil)
 }
