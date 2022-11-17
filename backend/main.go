@@ -65,7 +65,7 @@ func ListVotes(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	port := GetEnv("PORT", "8080")
+	port := GetEnv("PORT", "8000")
 	redisHost := GetEnv("REDIS_HOST", "localhost")
 	redisPort := GetEnv("REDIS_PORT", "6379")
 	log.Printf("Redis URI: %s:%s", redisHost, redisPort)
