@@ -1,7 +1,28 @@
 services:
+  backend:
+    image: ivanln26/iswiii-backend
+    build:
+      context: ./backend
+    container_name: iswiii-backend
+    depends_on:
+      - redis
+    env_file:
+      - ./backend/.env
+    ports:
+      - 8000:8000
+
+  vote-frontend:
+    image: ivanln26/iswiii-vote-frontend
+    build:
+      context: ./vote
+    container_name: iswiii-vote-frontend
+    depends_on:
+      - backend
+    ports:
+      - 3000:3000
+
   redis:
     image: redis:7.0.5-alpine
     container_name: iswiii-redis
-    restart: unless-stopped
     ports:
       - 6379:6379
