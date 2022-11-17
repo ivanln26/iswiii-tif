@@ -19,7 +19,7 @@ export const appRouter = router({
       };
     }),
   voteList: publicProcedure.query(async () => {
-    const res = await fetch("http://localhost:8000/votes");
+    const res = await fetch(`${process.env.BACKEND_URI}/votes`);
     const json = await res.json();
     const votes = Votes.parse(json);
     return {
