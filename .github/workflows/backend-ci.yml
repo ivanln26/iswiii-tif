@@ -21,4 +21,25 @@ jobs:
       with:
         context: "{{defaultContext}}:backend"
         push: true
-        tags: ivanln26/iswiii-tif-backend:${{ github.run_id }}
+        tags: ivanln26/iswiii-tif-backend:${{ github.run_number }}
+
+  gcr-deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v3
+    - id: auth
+      uses: google-github-actions/auth@v0
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    - name: Deploy to Cloud Run
+      uses: google-github-actions/deploy-cloudrun@v0
+      with:
+        source: ./backend
+        service: backend
+        env_vars: |
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=${{ secrets.REDIS_PORT }}
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+    - name: Show Output
+      run: echo ${{ steps.deploy.outputs.url }}
