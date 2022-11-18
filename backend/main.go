@@ -68,13 +68,14 @@ func main() {
 	port := GetEnv("PORT", "8000")
 	redisHost := GetEnv("REDIS_HOST", "localhost")
 	redisPort := GetEnv("REDIS_PORT", "6379")
+	redisPassword := GetEnv("REDIS_PASSWORD", "")
 	log.Printf("Redis URI: %s:%s", redisHost, redisPort)
 
 	ctx := context.Background()
 
 	r := redis.NewClient(&redis.Options{
 		Addr:     redisHost + ":" + redisPort,
-		Password: "",
+		Password: redisPassword,
 		DB:       0,
 	})
 	res, err := r.Ping(ctx).Result()
