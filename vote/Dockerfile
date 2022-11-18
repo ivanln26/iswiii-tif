@@ -1,7 +1,7 @@
 FROM node:19-alpine3.15 AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json package-lock.json /app
+COPY package.json package-lock.json /app/
 RUN npm ci
 
 FROM node:19-alpine3.15 AS build
