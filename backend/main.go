@@ -20,10 +20,9 @@ func GetEnv(key string, def string) string {
 }
 
 type Vote struct {
-	Choice int `json:"choice"`
+	Id     string `json:"id"`
+	Choice int    `json:"choice"`
 }
-
-var votes = make([]Vote, 0)
 
 type msg struct {
 	Hello string `json:"hello"`
@@ -47,9 +46,20 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(b))
 }
 
-func ListVotes(w http.ResponseWriter, r *http.Request) {
+type ListVotesHandler struct {
+	db VoteDB
+}
+
+func (h ListVotesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header()["Content-Type"] = []string{"application/json"}
 	if r.Method != http.MethodGet {
+		return
+	}
+
+	votes, err := h.db.GetAll()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, err)
 		return
 	}
 
@@ -66,10 +76,13 @@ func ListVotes(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	port := GetEnv("PORT", "8000")
+	dbDSN := GetEnv("DATABASE_DSN", "")
 	redisHost := GetEnv("REDIS_HOST", "localhost")
 	redisPort := GetEnv("REDIS_PORT", "6379")
 	redisPassword := GetEnv("REDIS_PASSWORD", "")
 	log.Printf("Redis URI: %s:%s", redisHost, redisPort)
+
+	db := DBFactory(dbDSN)
 
 	ctx := context.Background()
 
@@ -80,9 +93,9 @@ func main() {
 	})
 	res, err := r.Ping(ctx).Result()
 	if err != nil {
-		panic("redis not connected")
+		panic("redis: connection could not be established")
 	}
-	log.Println(res)
+	log.Println("redis: connection established", res)
 	pubsub := r.Subscribe(ctx, "votes")
 	ch := pubsub.Channel()
 
@@ -91,15 +104,18 @@ func main() {
 			var vote Vote
 			err := json.Unmarshal([]byte(msg.Payload), &vote)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 			}
-			fmt.Printf("%+v\n", vote)
-			votes = append(votes, vote)
+			log.Printf("redis: vote %+v arrived\n", vote)
+			_, err = db.Insert(vote)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}()
 
 	http.HandleFunc("/", Index)
-	http.HandleFunc("/votes", ListVotes)
+	http.Handle("/votes", ListVotesHandler{db})
 	log.Printf("Application running on port: %s", port)
 	http.ListenAndServe(":"+port, nil)
 }
