@@ -4,6 +4,19 @@ on:
   workflow_dispatch:
 
 jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Golang
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.19'
+    - name: Test runner
+      run: |
+        cd backend
+        go test
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +51,7 @@ jobs:
         source: ./backend
         service: backend
         env_vars: |
+          DATABASE_DSN=${{ secrets.DATABASE_DSN }}
           REDIS_HOST=${{ secrets.REDIS_HOST }}
           REDIS_PORT=${{ secrets.REDIS_PORT }}
           REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
