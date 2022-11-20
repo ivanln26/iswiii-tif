@@ -21,8 +21,21 @@ services:
     ports:
       - 3000:3000
 
+  db:
+    image: mysql:8.0.31
+    container_name: iswiii-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
   redis:
     image: redis:7.0.5-alpine
     container_name: iswiii-redis
     ports:
       - 6379:6379
+
+volumes:
+  db-data:
