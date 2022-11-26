@@ -136,7 +136,34 @@ func (db SQLDB) GetAll() ([]Vote, error) {
 }
 
 func (db SQLDB) GetPercentages() ([]VotePercentage, error) {
-	return []VotePercentage{}, nil
+	per := make([]VotePercentage, 0, 2)
+
+	tx, err := db.DB.Begin()
+	if err != nil {
+		return per, err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec("SET @count = (SELECT COUNT(*) FROM `vote`)")
+	if err != nil {
+		return per, err
+	}
+
+	rows, err := tx.Query("SELECT `choice`, COUNT(*) / @count * 100 AS porcentaje FROM `vote` GROUP BY `choice`")
+	if err != nil {
+		return per, err
+	}
+
+	for rows.Next() {
+		var choice int
+		var percentage float64
+		if err := rows.Scan(&choice, &percentage); err != nil {
+			return per, err
+		}
+		per = append(per, VotePercentage{choice, percentage})
+	}
+
+	return per, nil
 }
 
 func DBFactory(dsn string) VoteDB {
