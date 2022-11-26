@@ -8,6 +8,13 @@ const Vote = z.object({
 
 const Votes = z.array(Vote);
 
+const VotePercentage = z.object({
+  choice: z.number().int(),
+  percentage: z.number(),
+});
+
+const VotesPercentages = z.array(VotePercentage);
+
 export const appRouter = router({
   voteCreate: publicProcedure
     .input(Vote)
@@ -24,6 +31,14 @@ export const appRouter = router({
     const votes = Votes.parse(json);
     return {
       votes: votes,
+    };
+  }),
+  votePercentages: publicProcedure.query(async () => {
+    const res = await fetch(`${process.env.BACKEND_URI}/percentages`);
+    const json = await res.json();
+    const percentages = VotesPercentages.parse(json);
+    return {
+      percentages: percentages,
     };
   }),
 });
