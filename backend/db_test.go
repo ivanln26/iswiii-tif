@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"testing"
 )
 
@@ -52,5 +53,30 @@ func TestGetAllEmptyMapVoteDB(t *testing.T) {
 	votes, _ := m.GetAll()
 	if len(votes) != 0 {
 		t.Errorf("got slice size %d want %d\n", len(votes), 0)
+	}
+}
+
+func TestGetPercentagesMapVoteDB(t *testing.T) {
+	m := make(MapVoteDB)
+	m.Insert(Vote{"", 1})
+	m.Insert(Vote{"", 2})
+	m.Insert(Vote{"", 1})
+	percentages, _ := m.GetPercentages()
+	if math.Abs(percentages[0].Percentage-66.66) <= 1e-9 {
+		t.Errorf("got choice `1` with percentage %f want %f\n", percentages[0].Percentage, 66.66)
+	}
+	if math.Abs(percentages[1].Percentage-33.33) <= 1e-9 {
+		t.Errorf("got choice `2` with percentage %f want %f\n", percentages[1].Percentage, 33.33)
+	}
+}
+
+func TestGetPercentagesEmptyMapVoteDB(t *testing.T) {
+	m := make(MapVoteDB)
+	percentages, err := m.GetPercentages()
+	if len(percentages) != 0 {
+		t.Errorf("got percentage list size %d want %d\n", len(percentages), 0)
+	}
+	if err == nil {
+		t.Errorf("got nil error expected")
 	}
 }

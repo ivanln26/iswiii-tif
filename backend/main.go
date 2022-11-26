@@ -28,6 +28,15 @@ type msg struct {
 	Hello string `json:"hello"`
 }
 
+type VotePercentage struct {
+	Choice     int     `json:"choice"`
+	Percentage float64 `json:"percentage"`
+}
+
+type ErrorPayload struct {
+	Err string `json:"error"`
+}
+
 func Index(w http.ResponseWriter, r *http.Request) {
 	w.Header()["Content-Type"] = []string{"application/json"}
 	if r.Method != http.MethodGet {
@@ -74,6 +83,27 @@ func (h ListVotesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(b))
 }
 
+type PercentagesHandler struct {
+	db VoteDB
+}
+
+func (h PercentagesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header()["Content-Type"] = []string{"application/json"}
+	if r.Method != http.MethodGet {
+		return
+	}
+
+	per, err := h.db.GetPercentages()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(ErrorPayload{err.Error()})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(per)
+}
+
 func main() {
 	port := GetEnv("PORT", "8000")
 	dbDSN := GetEnv("DATABASE_DSN", "")
@@ -116,6 +146,7 @@ func main() {
 
 	http.HandleFunc("/", Index)
 	http.Handle("/votes", ListVotesHandler{db})
+	http.Handle("/percentages", PercentagesHandler{db})
 	log.Printf("Application running on port: %s", port)
 	http.ListenAndServe(":"+port, nil)
 }

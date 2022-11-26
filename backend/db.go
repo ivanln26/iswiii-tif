@@ -13,6 +13,7 @@ type VoteDB interface {
 	Insert(Vote) (Vote, error)
 	Get(string) (Vote, error)
 	GetAll() ([]Vote, error)
+	GetPercentages() ([]VotePercentage, error)
 }
 
 type MapVoteDB map[string]Vote
@@ -42,6 +43,26 @@ func (m MapVoteDB) GetAll() ([]Vote, error) {
 
 type SQLDB struct {
 	DB *sql.DB
+}
+
+func (m MapVoteDB) GetPercentages() ([]VotePercentage, error) {
+	percentages := make([]VotePercentage, 0, 2)
+	if len(m) == 0 {
+		return percentages, fmt.Errorf("map db: could not create percentages\n")
+	}
+	var countA int
+	var countB int
+	for _, v := range m {
+		if v.Choice == 1 {
+			countA++
+		}
+		if v.Choice == 2 {
+			countB++
+		}
+	}
+	percentages = append(percentages, VotePercentage{1, float64(countA) / float64(len(m)) * 100.0})
+	percentages = append(percentages, VotePercentage{2, float64(countB) / float64(len(m)) * 100.0})
+	return percentages, nil
 }
 
 func SQLDBConnect(dsn string) *SQLDB {
@@ -112,6 +133,10 @@ func (db SQLDB) GetAll() ([]Vote, error) {
 		votes = append(votes, Vote{id, choice})
 	}
 	return votes, nil
+}
+
+func (db SQLDB) GetPercentages() ([]VotePercentage, error) {
+	return []VotePercentage{}, nil
 }
 
 func DBFactory(dsn string) VoteDB {
