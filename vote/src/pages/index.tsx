@@ -4,7 +4,7 @@ export default function Home() {
   const mutation = trpc.voteCreate.useMutation();
 
   return (
-    <div className="flex flex-col justify-center h-screen p-2">
+    <div className="flex flex-col justify-center p-2">
       <h1 className="text-4xl py-4 text-center font-bold">
         Choose your &nbsp;
         <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
