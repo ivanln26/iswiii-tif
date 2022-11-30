@@ -48,20 +48,20 @@ type SQLDB struct {
 func (m MapVoteDB) GetPercentages() ([]VotePercentage, error) {
 	percentages := make([]VotePercentage, 0, 2)
 	if len(m) == 0 {
-		return percentages, fmt.Errorf("map db: could not create percentages\n")
+		return percentages, nil
 	}
-	var countA int
-	var countB int
+	countA, countB := 0, 0
 	for _, v := range m {
-		if v.Choice == 1 {
+		switch v.Choice {
+		case 1:
 			countA++
-		}
-		if v.Choice == 2 {
+		case 2:
 			countB++
 		}
 	}
-	percentages = append(percentages, VotePercentage{1, float64(countA) / float64(len(m)) * 100.0})
-	percentages = append(percentages, VotePercentage{2, float64(countB) / float64(len(m)) * 100.0})
+	vp1 := VotePercentage{1, float64(countA) / float64(len(m)) * 100.0}
+	vp2 := VotePercentage{2, float64(countB) / float64(len(m)) * 100.0}
+	percentages = append(percentages, vp1, vp2)
 	return percentages, nil
 }
 

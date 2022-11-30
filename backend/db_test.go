@@ -72,11 +72,8 @@ func TestGetPercentagesMapVoteDB(t *testing.T) {
 
 func TestGetPercentagesEmptyMapVoteDB(t *testing.T) {
 	m := make(MapVoteDB)
-	percentages, err := m.GetPercentages()
+	percentages, _ := m.GetPercentages()
 	if len(percentages) != 0 {
 		t.Errorf("got percentage list size %d want %d\n", len(percentages), 0)
-	}
-	if err == nil {
-		t.Errorf("got nil error expected")
 	}
 }
