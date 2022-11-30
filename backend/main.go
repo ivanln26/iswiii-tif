@@ -40,6 +40,7 @@ type ErrorPayload struct {
 func Index(w http.ResponseWriter, r *http.Request) {
 	w.Header()["Content-Type"] = []string{"application/json"}
 	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -62,6 +63,7 @@ type ListVotesHandler struct {
 func (h ListVotesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header()["Content-Type"] = []string{"application/json"}
 	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -90,6 +92,7 @@ type PercentagesHandler struct {
 func (h PercentagesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header()["Content-Type"] = []string{"application/json"}
 	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -102,6 +105,27 @@ func (h PercentagesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(per)
+}
+
+type ClearHandler struct {
+	db VoteDB
+}
+
+func (h ClearHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header()["Content-Type"] = []string{"application/json"}
+	if r.Method != http.MethodDelete {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := h.db.Clear()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(ErrorPayload{err.Error()})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
@@ -147,6 +171,7 @@ func main() {
 	http.HandleFunc("/", Index)
 	http.Handle("/votes", ListVotesHandler{db})
 	http.Handle("/percentages", PercentagesHandler{db})
+	http.Handle("/clear", ClearHandler{db})
 	log.Printf("Application running on port: %s", port)
 	http.ListenAndServe(":"+port, nil)
 }

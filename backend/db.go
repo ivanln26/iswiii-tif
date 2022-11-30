@@ -10,6 +10,7 @@ import (
 )
 
 type VoteDB interface {
+	Clear() error
 	Insert(Vote) (Vote, error)
 	Get(string) (Vote, error)
 	GetAll() ([]Vote, error)
@@ -17,6 +18,13 @@ type VoteDB interface {
 }
 
 type MapVoteDB map[string]Vote
+
+func (m MapVoteDB) Clear() error {
+	for k, _ := range m {
+		delete(m, k)
+	}
+	return nil
+}
 
 func (m MapVoteDB) Insert(v Vote) (Vote, error) {
 	v.Id = uuid.NewString()
@@ -78,6 +86,15 @@ func SQLDBConnect(dsn string) *SQLDB {
 	}
 	log.Println("mysql: connection succeded")
 	return &SQLDB{db}
+}
+
+func (db *SQLDB) Clear() error {
+	_, err := db.DB.Exec("TRUNCATE `vote`")
+	if err != nil {
+		log.Println("mysql: could not truncate the `vote` db", err)
+		return err
+	}
+	return nil
 }
 
 func (db *SQLDB) Insert(v Vote) (Vote, error) {
