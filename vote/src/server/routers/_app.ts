@@ -6,7 +6,12 @@ const Vote = z.object({
   choice: z.number().int(),
 });
 
-const Votes = z.array(Vote);
+const Votes = z.array(
+  z.object({
+    id: z.string().uuid(),
+    choice: z.number().int(),
+  }),
+);
 
 const VotePercentage = z.object({
   choice: z.number().int(),

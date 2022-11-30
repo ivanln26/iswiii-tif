@@ -12,8 +12,15 @@ export default function List() {
   }
 
   return (
-    <ul>
-      {list.data.votes.map((vote, i) => <li key={i}>{vote.choice}</li>)}
-    </ul>
+    <>
+      <h1 className="p-2 text-4xl font-bold">List</h1>
+      <div className="p-2">
+        <ul className="p-2 list-disc list-inside">
+          {list.data.votes.map((vote, i) => (
+            <li key={i}>{JSON.stringify(vote)}</li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 }
