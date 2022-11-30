@@ -15,7 +15,7 @@ const Votes = z.array(
 
 const VotePercentage = z.object({
   choice: z.number().int(),
-  percentage: z.number(),
+  percentage: z.number().transform((num) => num.toFixed(2)),
 });
 
 const VotesPercentages = z.array(VotePercentage);
