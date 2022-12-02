@@ -19,7 +19,7 @@ export default function Percentages() {
       <ul className="p-2">
         {percentages.data.percentages.map(({ choice, percentage }, i) => (
           <li key={i} className="flex flex-col">
-            <h1 className="text-2xl">Option {choice}</h1>
+            <h1 className="text-2xl">Opciones {choice}</h1>
             <div className="flex p-2">
               <h2 className="pr-4">{percentage}%</h2>
               <div className="bg-neutral-800 w-full rounded-md border border-amber-900 overflow-hidden">
