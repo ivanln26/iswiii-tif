@@ -1,6 +1,10 @@
 name: Backend
 
 on:
+  push:
+    branches:
+      - 'main'
+
   workflow_dispatch:
 
 jobs:
@@ -12,10 +16,23 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: '1.19'
+        cache: true
+        cache-dependency-path: backend/go.sum
+    - name: Install dependecies
+      working-directory: ./backend
+      run: go get .
     - name: Test runner
-      run: |
-        cd backend
-        go test
+      working-directory: ./backend
+      run: go test -json > test_results.json
+    - name: Build binary
+      working-directory: ./backend
+      run: go build -o backend
+    - uses: actions/upload-artifact@v3
+      with:
+        name: artifact
+        path: |
+          backend/backend
+          backend/test_results.json
 
   build-image:
     runs-on: ubuntu-latest
