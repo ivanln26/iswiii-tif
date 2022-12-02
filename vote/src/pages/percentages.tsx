@@ -1,7 +1,9 @@
 import { trpc } from "@/utils/trpc";
 
 export default function Percentages() {
-  const percentages = trpc.votePercentages.useQuery();
+  const percentages = trpc.votePercentages.useQuery(undefined, {
+    refetchInterval: 1000,
+  });
 
   if (percentages.isLoading) {
     return <h1>Cargando...</h1>;
